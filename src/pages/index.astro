@@ -16,6 +16,15 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>What will you build next?</title>
+    <!-- WF Visual Sans is Webflow's custom brand typeface (licensed, download-only).
+         Poppins/Inter are the brand guide's own sanctioned Google Font fallback,
+         so we use those instead of shipping custom font files. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@600&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body data-reveal-effect={activityTheme.revealEffect} style={`--activity-accent: ${activityTheme.accentColor}`}>
     <main class="wrap">
@@ -263,10 +272,18 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
 
       body {
         margin: 0;
-        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-        background: #0f1115;
-        color: #f4f4f6;
+        font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: #171717;
+        color: #ffffff;
         padding-block: 2.5rem;
+        line-height: 1.6;
+      }
+
+      h1, h2, h3, legend {
+        font-family: "Poppins", "Inter", system-ui, sans-serif;
+        font-weight: 600;
+        line-height: 1.04;
+        letter-spacing: 0.01em;
       }
 
       .wrap {
@@ -281,7 +298,7 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
       }
 
       .intro p {
-        color: #b7bac2;
+        color: #ababab;
         margin-top: 0;
       }
 
@@ -295,7 +312,7 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
       }
 
       .status-line {
-        color: #b7bac2;
+        color: #ababab;
       }
 
       fieldset {
@@ -321,11 +338,11 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
         display: flex;
         flex-direction: column;
         gap: 0.35rem;
-        border: 2px solid #2a2d36;
+        border: 2px solid #363636;
         border-radius: 0.75rem;
         padding: 1rem;
         cursor: pointer;
-        background: #171a21;
+        background: #222222;
         transition: border-color 0.15s ease, transform 0.15s ease;
       }
 
@@ -357,14 +374,14 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
 
       .choice-example {
         font-size: 0.9rem;
-        color: #b7bac2;
+        color: #ababab;
       }
 
       #submit-btn,
       .start-over,
       #retry-btn {
         background: var(--activity-accent);
-        color: #10121a;
+        color: #ffffff;
         border: none;
         border-radius: 0.6rem;
         padding: 0.75rem 1.25rem;
@@ -387,8 +404,8 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
       }
 
       .error-banner {
-        background: #3a1f1f;
-        border: 1px solid #a94442;
+        background: #2a1215;
+        border: 1px solid #ee1d36;
         border-radius: 0.6rem;
         padding: 1rem;
         margin-bottom: 1.5rem;
@@ -409,8 +426,8 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
         gap: 1.25rem;
         align-items: flex-start;
         flex-wrap: wrap;
-        background: #171a21;
-        border: 1px solid #2a2d36;
+        background: #222222;
+        border: 1px solid #363636;
         border-radius: 1rem;
         padding: 1.5rem;
         margin-bottom: 1.5rem;
@@ -455,12 +472,12 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
         height: 120px;
         flex-shrink: 0;
         border-radius: 0.75rem;
-        background: #10121a;
+        background: #171717;
         object-fit: contain;
       }
 
       .reveal-eyebrow {
-        color: #b7bac2;
+        color: #ababab;
         margin: 0 0 0.25rem;
       }
 
@@ -469,14 +486,14 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
       }
 
       .results-panel {
-        background: #171a21;
-        border: 1px solid #2a2d36;
+        background: #222222;
+        border: 1px solid #363636;
         border-radius: 1rem;
         padding: 1.5rem;
       }
 
       .sample-note {
-        color: #b7bac2;
+        color: #ababab;
         margin-top: 0;
       }
 
@@ -498,7 +515,7 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
       }
 
       .results-bar-track {
-        background: #10121a;
+        background: #171717;
         border-radius: 999px;
         overflow: hidden;
         height: 0.5rem;

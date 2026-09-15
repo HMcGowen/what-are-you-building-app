@@ -10,6 +10,6 @@
 //   behavior regardless of this setting.
 
 export const activityTheme = {
-  accentColor: "#7C5CFF",
+  accentColor: "#146EF5", // Webflow brand blue
   revealEffect: "burst" as "burst" | "fade",
 };
