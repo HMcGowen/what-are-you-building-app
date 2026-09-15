@@ -1,5 +1,5 @@
 // Central definition of the four project directions and their build
-// companions. Update copy, colors, or artwork references here — nothing
+// artifacts. Update copy, colors, or artwork references here — nothing
 // else in the app needs to change.
 
 export type ChoiceId =
@@ -11,7 +11,7 @@ export type ChoiceId =
 export interface Choice {
   id: ChoiceId;
   label: string;
-  companionName: string;
+  artifactName: string;
   description: string;
   exampleProject: string;
   accentColor: string;
@@ -23,53 +23,53 @@ export const CHOICES: Choice[] = [
   {
     id: "interactive-tool",
     label: "An interactive tool",
-    companionName: "The Tinkerer",
+    artifactName: "Control Deck",
     description:
-      "A curious builder surrounded by controls, tools, and moving parts — happiest when something responds the moment you touch it.",
+      "A panel of dials, buttons, and switches, built to respond the instant it's touched — every input has a clear, immediate effect.",
     exampleProject: "A calculator, configurator, quiz, or planning tool.",
     accentColor: "#FF6B00",
-    artworkSrc: "/characters/interactive-tool.svg",
+    artworkSrc: "/artifacts/interactive-tool.png",
     artworkAlt:
-      "The Tinkerer, a build companion surrounded by dials, levers, and small moving mechanisms.",
+      "Control Deck, a low-poly control panel with glowing buttons, a joystick, and switches.",
   },
   {
     id: "live-data",
     label: "A live data experience",
-    companionName: "The Signal Keeper",
+    artifactName: "Signal Beacon",
     description:
-      "A character surrounded by signals, changing data points, and rhythmic pulses — always watching what just changed.",
+      "A glowing core that pulses with every incoming signal, radiating outward each time something new comes in.",
     exampleProject:
       "A property search, availability lookup, live schedule, or inventory experience.",
     accentColor: "#146EF5",
-    artworkSrc: "/characters/live-data.svg",
+    artworkSrc: "/artifacts/live-data.png",
     artworkAlt:
-      "The Signal Keeper, a build companion surrounded by pulsing signals and shifting data points.",
+      "Signal Beacon, a low-poly glowing blue orb radiating pulses of light from a dark pedestal.",
   },
   {
     id: "signed-in-portal",
     label: "A signed-in portal",
-    companionName: "The Guide",
+    artifactName: "Key Portal",
     description:
-      "A character associated with a key, a badge, and an organized personal space — built to lead someone somewhere specific.",
+      "A threshold that only opens for the right key — built to lead someone straight to their own organized space.",
     exampleProject:
       "A customer account, employee resource, member dashboard, or private document center.",
     accentColor: "#7A3DFF",
-    artworkSrc: "/characters/signed-in-portal.svg",
+    artworkSrc: "/artifacts/signed-in-portal.png",
     artworkAlt:
-      "The Guide, a build companion holding a key beside an organized doorway.",
+      "Key Portal, a low-poly glowing archway with a key fragment floating beside it.",
   },
   {
     id: "standalone-app",
     label: "A standalone app",
-    companionName: "The Pathfinder",
+    artifactName: "Launch Pod",
     description:
-      "An explorer with a map and a launch trail — comfortable building a small independent world from scratch.",
+      "A sealed shell that cracks open to reveal something new — built to stand on its own from the moment it launches.",
     exampleProject:
       "An event planner, internal tool, focused web product, or experimental experience.",
     accentColor: "#00D722",
-    artworkSrc: "/characters/standalone-app.svg",
+    artworkSrc: "/artifacts/standalone-app.png",
     artworkAlt:
-      "The Pathfinder, a build companion standing beside a map and a launch trail.",
+      "Launch Pod, a low-poly cracked-open orb glowing from within, mounted on a stand.",
   },
 ];
 
