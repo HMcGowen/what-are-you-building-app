@@ -50,11 +50,11 @@ export const CHOICES: Choice[] = [
     description:
       "A curious beacon tuned to signals from every direction, gathering each update and bringing the latest picture into view.",
     exampleProject:
-      "A property search, availability lookup, live schedule, or inventory experience.",
+      "A property search, availability lookup, live schedule, or job listings.",
     buildDetails:
-      "A property search, availability lookup, live schedule, or inventory experience. A Cloud app can request current data from another system without exposing private credentials.",
+      "A property search, availability lookup, live schedule, or job listings. A Cloud app can request current data from another system without exposing private credentials.",
     resourceLabel: "See a live-data example",
-    resourceUrl: "https://developers.webflow.com/webflow-cloud/add-key-value-store",
+    resourceUrl: "https://github.com/Webflow-Examples/careers-page-webapp",
     accentColor: "#146EF5",
     artworkSrc: "/artifacts/live-data.png",
     artworkAlt:
