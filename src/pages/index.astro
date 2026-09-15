@@ -61,7 +61,7 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
       </section>
 
       <section id="reveal" class="reveal" hidden aria-live="polite">
-        <div class="reveal-card">
+        <div id="reveal-card" class="reveal-card">
           <span id="reveal-art-wrap" class="reveal-art-wrap">
             <img id="reveal-art" alt="" class="reveal-art" />
           </span>
@@ -69,7 +69,12 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
             <p class="reveal-eyebrow">You picked: <span id="reveal-choice-label"></span></p>
             <h2>Meet your build artifact: <span id="reveal-artifact-name"></span></h2>
             <p id="reveal-description"></p>
-            <p class="reveal-example"><strong>It could become:</strong> <span id="reveal-example"></span></p>
+            <p class="reveal-example"><strong>What you could build:</strong> <span id="reveal-example"></span></p>
+            <a id="reveal-resource-link" class="resource-link" href="#" target="_blank" rel="noopener noreferrer">
+              <span id="reveal-resource-label"></span>
+              <span aria-hidden="true">↗</span>
+              <span class="visually-hidden"> (opens in a new tab)</span>
+            </a>
           </div>
         </div>
 
@@ -94,6 +99,9 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
         artifactName: string;
         description: string;
         exampleProject: string;
+        buildDetails: string;
+        resourceLabel: string;
+        resourceUrl: string;
         accentColor: string;
         artworkSrc: string;
         artworkAlt: string;
@@ -124,12 +132,14 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
       const errorMessage = document.getElementById("error-message") as HTMLElement;
       const retryBtn = document.getElementById("retry-btn") as HTMLButtonElement;
       const revealSection = document.getElementById("reveal") as HTMLElement;
-      const revealArtWrap = document.getElementById("reveal-art-wrap") as HTMLElement;
+      const revealCard = document.getElementById("reveal-card") as HTMLElement;
       const revealArt = document.getElementById("reveal-art") as HTMLImageElement;
       const revealChoiceLabel = document.getElementById("reveal-choice-label") as HTMLElement;
       const revealArtifactName = document.getElementById("reveal-artifact-name") as HTMLElement;
       const revealDescription = document.getElementById("reveal-description") as HTMLElement;
       const revealExample = document.getElementById("reveal-example") as HTMLElement;
+      const revealResourceLink = document.getElementById("reveal-resource-link") as HTMLAnchorElement;
+      const revealResourceLabel = document.getElementById("reveal-resource-label") as HTMLElement;
       const sampleNote = document.getElementById("sample-note") as HTMLElement;
       const resultsList = document.getElementById("results-list") as HTMLElement;
       const startOverBtn = document.getElementById("start-over-btn") as HTMLButtonElement;
@@ -180,11 +190,13 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
 
         revealArt.src = withBase(choice.artworkSrc);
         revealArt.alt = choice.artworkAlt;
-        revealArtWrap.style.setProperty("--choice-accent", choice.accentColor);
+        revealCard.style.setProperty("--choice-accent", choice.accentColor);
         revealChoiceLabel.textContent = choice.label;
         revealArtifactName.textContent = choice.artifactName;
         revealDescription.textContent = choice.description;
-        revealExample.textContent = choice.exampleProject;
+        revealExample.textContent = choice.buildDetails;
+        revealResourceLink.href = choice.resourceUrl;
+        revealResourceLabel.textContent = choice.resourceLabel;
         renderResults(payload);
 
         form.hidden = true;
@@ -296,7 +308,7 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
       }
 
       .wrap {
-        max-width: 760px;
+        max-width: 1040px;
         margin-inline: auto;
         padding-inline: 1.25rem;
       }
@@ -436,15 +448,21 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
       }
 
       .reveal-card {
-        display: flex;
-        gap: 1.25rem;
-        align-items: flex-start;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: 2fr 3fr;
+        gap: 2rem;
+        align-items: center;
         background: #222222;
         border: 1px solid #363636;
         border-radius: 1rem;
         padding: 1.5rem;
         margin-bottom: 1.5rem;
+      }
+
+      @media (max-width: 640px) {
+        .reveal-card {
+          grid-template-columns: 1fr;
+        }
       }
 
       body[data-reveal-effect="burst"] .reveal-card {
@@ -485,9 +503,10 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
         position: relative;
         display: grid;
         place-items: center;
-        width: 190px;
-        height: 190px;
-        flex-shrink: 0;
+        width: 100%;
+        max-width: 280px;
+        aspect-ratio: 1 / 1;
+        margin-inline: auto;
         border-radius: 1rem;
         background: #171717;
       }
@@ -505,8 +524,8 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
 
       .reveal-art {
         position: relative;
-        width: 150px;
-        height: 150px;
+        width: 76%;
+        height: 76%;
         object-fit: contain;
       }
 
@@ -523,6 +542,27 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
 
       .reveal-example {
         margin-top: 0.75rem;
+      }
+
+      .resource-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 1rem;
+        color: var(--choice-accent, var(--activity-accent));
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .resource-link:hover,
+      .resource-link:focus-visible {
+        text-decoration: underline;
+      }
+
+      .resource-link:focus-visible {
+        outline: 3px solid var(--activity-accent);
+        outline-offset: 3px;
+        border-radius: 0.2rem;
       }
 
       .results-panel {

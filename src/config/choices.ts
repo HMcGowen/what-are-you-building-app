@@ -1,6 +1,10 @@
 // Central definition of the four project directions and their build
 // artifacts. Update copy, colors, or artwork references here — nothing
 // else in the app needs to change.
+//
+// exampleProject is the short teaser shown on the choice picker cards.
+// buildDetails is the longer, approved copy shown on the reveal screen —
+// keep these distinct; buildDetails is too long for the picker cards.
 
 export type ChoiceId =
   | "interactive-tool"
@@ -14,6 +18,9 @@ export interface Choice {
   artifactName: string;
   description: string;
   exampleProject: string;
+  buildDetails: string;
+  resourceLabel: string;
+  resourceUrl: string;
   accentColor: string;
   artworkSrc: string;
   artworkAlt: string;
@@ -25,8 +32,12 @@ export const CHOICES: Choice[] = [
     label: "An interactive tool",
     artifactName: "Control Deck",
     description:
-      "A panel of dials, buttons, and switches, built to respond the instant it's touched — every input has a clear, immediate effect.",
+      "A pocket-sized command center, alive with dials, buttons, and switches. Every choice sets a new possibility in motion.",
     exampleProject: "A calculator, configurator, quiz, or planning tool.",
+    buildDetails:
+      "A calculator, configurator, quiz, or planning tool. Webflow Cloud becomes useful when the experience needs to save shared results, make secure requests, or connect to another service.",
+    resourceLabel: "Explore data storage",
+    resourceUrl: "https://developers.webflow.com/webflow-cloud/storing-data/overview",
     accentColor: "#FF6B00",
     artworkSrc: "/artifacts/interactive-tool.png",
     artworkAlt:
@@ -37,9 +48,13 @@ export const CHOICES: Choice[] = [
     label: "A live data experience",
     artifactName: "Signal Beacon",
     description:
-      "A glowing core that pulses with every incoming signal, radiating outward each time something new comes in.",
+      "A curious beacon tuned to signals from every direction, gathering each update and bringing the latest picture into view.",
     exampleProject:
       "A property search, availability lookup, live schedule, or inventory experience.",
+    buildDetails:
+      "A property search, availability lookup, live schedule, or inventory experience. A Cloud app can request current data from another system without exposing private credentials.",
+    resourceLabel: "See a live-data example",
+    resourceUrl: "https://developers.webflow.com/webflow-cloud/add-key-value-store",
     accentColor: "#146EF5",
     artworkSrc: "/artifacts/live-data.png",
     artworkAlt:
@@ -50,9 +65,13 @@ export const CHOICES: Choice[] = [
     label: "A signed-in portal",
     artifactName: "Key Portal",
     description:
-      "A threshold that only opens for the right key — built to lead someone straight to their own organized space.",
+      "A quiet doorway that knows who is knocking, opening onto a space arranged just for them.",
     exampleProject:
       "A customer account, employee resource, member dashboard, or private document center.",
+    buildDetails:
+      "A customer account, employee resource, member dashboard, or private document center. The app can connect to an identity provider and check access before returning protected information.",
+    resourceLabel: "Explore authentication examples",
+    resourceUrl: "https://github.com/Webflow-Examples/auth-cloud-webapp",
     accentColor: "#7A3DFF",
     artworkSrc: "/artifacts/signed-in-portal.png",
     artworkAlt:
@@ -63,9 +82,13 @@ export const CHOICES: Choice[] = [
     label: "A standalone app",
     artifactName: "Launch Pod",
     description:
-      "A sealed shell that cracks open to reveal something new — built to stand on its own from the moment it launches.",
+      "A small vessel carrying a complete idea, ready to lift off and find a place of its own online.",
     exampleProject:
       "An event planner, internal tool, focused web product, or experimental experience.",
+    buildDetails:
+      "An event planner, internal tool, focused web product, or experimental experience. Webflow Cloud can host it on its own domain without requiring a parent Webflow site.",
+    resourceLabel: "Deploy a standalone app",
+    resourceUrl: "https://developers.webflow.com/webflow-cloud/getting-started",
     accentColor: "#00D722",
     artworkSrc: "/artifacts/standalone-app.png",
     artworkAlt:
