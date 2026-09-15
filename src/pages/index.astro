@@ -1,0 +1,513 @@
+---
+import { CHOICES } from "../config/choices";
+import { activityTheme } from "../config/activity-theme";
+
+const choicesJson = JSON.stringify(CHOICES);
+// import.meta.env.BASE_URL reflects Astro's configured base ("/" in a
+// deployed standalone app; a literal "/CLOUD_MOUNT_PATH/" placeholder in
+// local dev before Webflow's build substitutes the real mount path).
+// Client-side fetch/image URLs must be joined against it explicitly —
+// hardcoded root-relative paths silently 404 under a non-root base.
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>What will you build next?</title>
+  </head>
+  <body data-reveal-effect={activityTheme.revealEffect} style={`--activity-accent: ${activityTheme.accentColor}`}>
+    <main class="wrap">
+      <header class="intro">
+        <h1>What will you build next?</h1>
+        <p>Pick a project direction and meet your build companion.</p>
+      </header>
+
+      <p id="loading-message" class="status-line" hidden>Loading your previous result…</p>
+
+      <form id="choice-form" class="choice-form">
+        <fieldset>
+          <legend>Choose a project direction</legend>
+          <div class="choice-grid">
+            {
+              CHOICES.map((choice) => (
+                <label class="choice-card" style={`--choice-accent: ${choice.accentColor}`}>
+                  <input type="radio" name="choice" value={choice.id} required />
+                  <span class="choice-label">{choice.label}</span>
+                  <span class="choice-example">{choice.exampleProject}</span>
+                </label>
+              ))
+            }
+          </div>
+        </fieldset>
+        <button type="submit" id="submit-btn">Reveal my build companion</button>
+      </form>
+
+      <div id="status" role="status" aria-live="polite" class="visually-hidden"></div>
+
+      <section id="error-banner" role="alert" class="error-banner" hidden>
+        <p id="error-message"></p>
+        <button type="button" id="retry-btn">Try again</button>
+      </section>
+
+      <section id="reveal" class="reveal" hidden aria-live="polite">
+        <div class="reveal-card">
+          <img id="reveal-art" alt="" class="reveal-art" />
+          <div class="reveal-copy">
+            <p class="reveal-eyebrow">You picked: <span id="reveal-choice-label"></span></p>
+            <h2>Meet your build companion: <span id="reveal-companion-name"></span></h2>
+            <p id="reveal-description"></p>
+            <p class="reveal-example"><strong>It could become:</strong> <span id="reveal-example"></span></p>
+          </div>
+        </div>
+
+        <div class="results-panel">
+          <h3>How everyone has answered so far</h3>
+          <p id="sample-note" class="sample-note"></p>
+          <ul id="results-list" class="results-list"></ul>
+          <button type="button" id="start-over-btn" class="start-over">Choose a different direction</button>
+        </div>
+      </section>
+    </main>
+
+    <script type="application/json" id="choices-data" set:html={choicesJson} />
+    <script type="application/json" id="base-url-data" set:html={JSON.stringify(baseUrl)} />
+
+    <script>
+      type ChoiceId = "interactive-tool" | "live-data" | "signed-in-portal" | "standalone-app";
+
+      interface Choice {
+        id: ChoiceId;
+        label: string;
+        companionName: string;
+        description: string;
+        exampleProject: string;
+        accentColor: string;
+        artworkSrc: string;
+        artworkAlt: string;
+      }
+
+      interface ResultsPayload {
+        totals: Record<ChoiceId, number>;
+        totalCount: number;
+        mostPopular: ChoiceId | null;
+        sampleBaselineCount: number;
+      }
+
+      const STORAGE_KEY = "wwybn:choiceId";
+
+      const choicesDataEl = document.getElementById("choices-data");
+      const CHOICES: Choice[] = JSON.parse(choicesDataEl?.textContent ?? "[]");
+      const choicesById = new Map(CHOICES.map((c) => [c.id, c]));
+
+      const baseUrlDataEl = document.getElementById("base-url-data");
+      const BASE_URL: string = JSON.parse(baseUrlDataEl?.textContent ?? '""');
+      const withBase = (path: string) => `${BASE_URL}${path}`;
+
+      const form = document.getElementById("choice-form") as HTMLFormElement;
+      const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
+      const statusEl = document.getElementById("status") as HTMLElement;
+      const loadingMessage = document.getElementById("loading-message") as HTMLElement;
+      const errorBanner = document.getElementById("error-banner") as HTMLElement;
+      const errorMessage = document.getElementById("error-message") as HTMLElement;
+      const retryBtn = document.getElementById("retry-btn") as HTMLButtonElement;
+      const revealSection = document.getElementById("reveal") as HTMLElement;
+      const revealArt = document.getElementById("reveal-art") as HTMLImageElement;
+      const revealChoiceLabel = document.getElementById("reveal-choice-label") as HTMLElement;
+      const revealCompanionName = document.getElementById("reveal-companion-name") as HTMLElement;
+      const revealDescription = document.getElementById("reveal-description") as HTMLElement;
+      const revealExample = document.getElementById("reveal-example") as HTMLElement;
+      const sampleNote = document.getElementById("sample-note") as HTMLElement;
+      const resultsList = document.getElementById("results-list") as HTMLElement;
+      const startOverBtn = document.getElementById("start-over-btn") as HTMLButtonElement;
+
+      let lastAction: (() => void) | null = null;
+
+      function setStatus(message: string) {
+        statusEl.textContent = message;
+      }
+
+      function showError(message: string, retry: () => void) {
+        errorMessage.textContent = message;
+        errorBanner.hidden = false;
+        lastAction = retry;
+      }
+
+      function clearError() {
+        errorBanner.hidden = true;
+        lastAction = null;
+      }
+
+      function renderResults(payload: ResultsPayload) {
+        sampleNote.textContent = `Results started with ${payload.sampleBaselineCount} sample responses and update as people respond.`;
+        resultsList.innerHTML = "";
+        for (const choice of CHOICES) {
+          const count = payload.totals[choice.id] ?? 0;
+          const percent = payload.totalCount > 0 ? Math.round((count / payload.totalCount) * 100) : 0;
+          const isMostPopular = payload.mostPopular === choice.id;
+
+          const li = document.createElement("li");
+          li.className = "results-row";
+          li.innerHTML = `
+            <div class="results-row-head">
+              <span>${choice.label}${isMostPopular ? " — most popular" : ""}</span>
+              <span>${count} response${count === 1 ? "" : "s"} (${percent}%)</span>
+            </div>
+            <div class="results-bar-track">
+              <div class="results-bar-fill" style="width:${percent}%; background:${choice.accentColor}"></div>
+            </div>
+          `;
+          resultsList.appendChild(li);
+        }
+      }
+
+      function renderReveal(choiceId: ChoiceId, payload: ResultsPayload) {
+        const choice = choicesById.get(choiceId);
+        if (!choice) return;
+
+        revealArt.src = withBase(choice.artworkSrc);
+        revealArt.alt = choice.artworkAlt;
+        revealChoiceLabel.textContent = choice.label;
+        revealCompanionName.textContent = choice.companionName;
+        revealDescription.textContent = choice.description;
+        revealExample.textContent = choice.exampleProject;
+        renderResults(payload);
+
+        form.hidden = true;
+        revealSection.hidden = false;
+      }
+
+      async function fetchResults(): Promise<ResultsPayload> {
+        const res = await fetch(withBase("/api/results"));
+        if (!res.ok) throw new Error("results-failed");
+        return res.json();
+      }
+
+      async function submitChoice(choiceId: ChoiceId): Promise<ResultsPayload> {
+        const res = await fetch(withBase("/api/submit"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ choiceId }),
+        });
+        if (!res.ok) throw new Error("submit-failed");
+        return res.json();
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const selected = form.querySelector<HTMLInputElement>('input[name="choice"]:checked');
+        if (!selected) return;
+
+        const choiceId = selected.value as ChoiceId;
+        clearError();
+        submitBtn.disabled = true;
+        form.querySelectorAll("input").forEach((input) => (input.disabled = true));
+        setStatus("Saving your response…");
+
+        try {
+          const payload = await submitChoice(choiceId);
+          window.localStorage.setItem(STORAGE_KEY, choiceId);
+          setStatus("Your response was saved.");
+          renderReveal(choiceId, payload);
+        } catch {
+          submitBtn.disabled = false;
+          form.querySelectorAll("input").forEach((input) => (input.disabled = false));
+          setStatus("");
+          showError("We couldn't save your response. Please try again.", () => form.requestSubmit());
+        }
+      });
+
+      retryBtn.addEventListener("click", () => {
+        clearError();
+        lastAction?.();
+      });
+
+      startOverBtn.addEventListener("click", () => {
+        window.localStorage.removeItem(STORAGE_KEY);
+        revealSection.hidden = true;
+        form.hidden = false;
+        form.reset();
+        setStatus("");
+      });
+
+      async function restorePreviousChoice(choiceId: ChoiceId) {
+        loadingMessage.hidden = false;
+        form.hidden = true;
+        try {
+          const payload = await fetchResults();
+          loadingMessage.hidden = true;
+          renderReveal(choiceId, payload);
+        } catch {
+          loadingMessage.hidden = true;
+          showError("We couldn't load your saved result. Please try again.", () =>
+            restorePreviousChoice(choiceId)
+          );
+        }
+      }
+
+      const savedChoiceId = window.localStorage.getItem(STORAGE_KEY) as ChoiceId | null;
+      if (savedChoiceId && choicesById.has(savedChoiceId)) {
+        restorePreviousChoice(savedChoiceId);
+      }
+    </script>
+
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: #0f1115;
+        color: #f4f4f6;
+        padding-block: 2.5rem;
+      }
+
+      .wrap {
+        max-width: 760px;
+        margin-inline: auto;
+        padding-inline: 1.25rem;
+      }
+
+      .intro h1 {
+        font-size: clamp(1.6rem, 4vw, 2.2rem);
+        margin-bottom: 0.25rem;
+      }
+
+      .intro p {
+        color: #b7bac2;
+        margin-top: 0;
+      }
+
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+
+      .status-line {
+        color: #b7bac2;
+      }
+
+      fieldset {
+        border: none;
+        padding: 0;
+        margin: 0 0 1.5rem;
+      }
+
+      legend {
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        padding: 0;
+      }
+
+      .choice-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0.75rem;
+      }
+
+      .choice-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        border: 2px solid #2a2d36;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        cursor: pointer;
+        background: #171a21;
+        transition: border-color 0.15s ease, transform 0.15s ease;
+      }
+
+      .choice-card:has(input:checked) {
+        border-color: var(--choice-accent);
+      }
+
+      .choice-card:has(input:focus-visible) {
+        outline: 3px solid var(--activity-accent);
+        outline-offset: 2px;
+      }
+
+      .choice-card input {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 1.1rem;
+        height: 1.1rem;
+      }
+
+      .choice-card input:disabled {
+        cursor: not-allowed;
+      }
+
+      .choice-label {
+        font-weight: 600;
+        padding-right: 1.5rem;
+      }
+
+      .choice-example {
+        font-size: 0.9rem;
+        color: #b7bac2;
+      }
+
+      #submit-btn,
+      .start-over,
+      #retry-btn {
+        background: var(--activity-accent);
+        color: #10121a;
+        border: none;
+        border-radius: 0.6rem;
+        padding: 0.75rem 1.25rem;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+
+      #submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      #submit-btn:focus-visible,
+      .start-over:focus-visible,
+      #retry-btn:focus-visible,
+      .choice-card:focus-within {
+        outline: 3px solid var(--activity-accent);
+        outline-offset: 2px;
+      }
+
+      .error-banner {
+        background: #3a1f1f;
+        border: 1px solid #a94442;
+        border-radius: 0.6rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      /* [hidden] must win over the flex layout below, or the banner shows
+         even while the hidden attribute is set (equal-specificity clash). */
+      .error-banner:not([hidden]) {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+      }
+
+      .reveal-card {
+        display: flex;
+        gap: 1.25rem;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        background: #171a21;
+        border: 1px solid #2a2d36;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      body[data-reveal-effect="burst"] .reveal-card {
+        animation: burst-in 0.5s ease-out;
+      }
+
+      body[data-reveal-effect="fade"] .reveal-card {
+        animation: fade-in 0.5s ease-out;
+      }
+
+      @keyframes burst-in {
+        from {
+          opacity: 0;
+          transform: scale(0.85);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes fade-in {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .reveal-card {
+          animation: none !important;
+        }
+      }
+
+      .reveal-art {
+        width: 120px;
+        height: 120px;
+        flex-shrink: 0;
+        border-radius: 0.75rem;
+        background: #10121a;
+        object-fit: contain;
+      }
+
+      .reveal-eyebrow {
+        color: #b7bac2;
+        margin: 0 0 0.25rem;
+      }
+
+      .reveal-example {
+        margin-top: 0.75rem;
+      }
+
+      .results-panel {
+        background: #171a21;
+        border: 1px solid #2a2d36;
+        border-radius: 1rem;
+        padding: 1.5rem;
+      }
+
+      .sample-note {
+        color: #b7bac2;
+        margin-top: 0;
+      }
+
+      .results-list {
+        list-style: none;
+        margin: 0 0 1.25rem;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .results-row-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+        margin-bottom: 0.35rem;
+      }
+
+      .results-bar-track {
+        background: #10121a;
+        border-radius: 999px;
+        overflow: hidden;
+        height: 0.5rem;
+      }
+
+      .results-bar-fill {
+        height: 100%;
+        border-radius: 999px;
+      }
+    </style>
+  </body>
+</html>
