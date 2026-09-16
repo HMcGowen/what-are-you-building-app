@@ -1,12 +1,12 @@
 # What will you build next?
 
-A small Webflow Cloud app for a Webflow University activity. Participants pick a
-project direction, meet a placeholder "build companion," and submit their choice —
-which is stored server-side in a Webflow Cloud SQLite (D1) database and shown back
-as updated totals that persist after a refresh.
+A Webflow Cloud app for a Webflow University activity. Participants pick a
+project direction, submit their choice, and get a reveal — their artifact,
+a short description, "what you could build," and a link to a relevant
+Webflow Cloud resource — plus shared results that persist after a refresh.
 
-This is a **technical prototype**. Character art is a styled placeholder; final
-names, copy, and illustrations are still in development.
+This repository is the **working learner starting point**. Two optional
+activity paths extend it.
 
 ## Stack
 
@@ -16,24 +16,30 @@ names, copy, and illustrations are still in development.
 
 ## Project structure
 
-- `src/config/choices.ts` — the four project directions and their companions
+- `src/config/choices.ts` — the four project directions and their build artifacts
 - `src/config/activity-theme.ts` — the only two settings meant to be edited directly (accent color, reveal effect)
-- `src/lib/db.ts` — query logic (aggregate totals, insert a response)
+- `src/lib/db.ts` — query logic (aggregate totals, insert a response, tie-aware leader detection)
 - `src/pages/api/results.ts` / `submit.ts` — the two server endpoints
-- `src/pages/index.astro` — the whole UI
+- `src/pages/index.astro` — the whole UI, including the results-rendering flow
 - `migrations/0001_init.sql` — schema + 24 seeded sample responses
 
 ## Local development
 
 ```bash
 npm install
-npm run cf-typegen        # generates Cloudflare env types
-npm run db:migrate:local  # applies the schema + seed data to a local D1 file
 npm run dev
 ```
 
-Then open the local dev URL and try a submission — the count and "most popular"
-result should update, and refreshing the page should keep your choice.
+That's it. `npm run dev` automatically applies any pending local database
+migration first (via a `predev` script), so the schema and the 24 seed
+responses are ready the first time you run it — and running it again later
+is safe; it won't reapply migrations or duplicate seed data.
+
+Then open the local dev URL and try a submission — the count and leader
+label should update, and refreshing the page should keep your choice.
+
+(Optional: `npm run cf-typegen` generates Cloudflare environment types for
+editor/type-checking convenience. It isn't required to run or build the app.)
 
 ## Deploying
 
@@ -42,11 +48,3 @@ This app is meant to be deployed through the Webflow Cloud dashboard as a
 choose the branch, name the app, and deploy. Webflow Cloud provisions the D1
 database automatically from the `wrangler.json` binding and runs the migration
 (including the seed data) on the first deploy.
-
-Full learner-facing deployment and troubleshooting steps will be added once the
-first live deploy has been verified end-to-end.
-
-## Status
-
-Technical prototype — not yet deployed or tested against a live Webflow Cloud
-environment. Do not treat as the final learner template yet.

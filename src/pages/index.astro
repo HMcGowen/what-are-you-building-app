@@ -81,6 +81,8 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
         <div class="results-panel">
           <h3>How everyone has answered so far</h3>
           <p id="sample-note" class="sample-note"></p>
+          <!-- PATH 2: Hidden until renderComparisonInsight() adds content. -->
+          <p id="comparison-insight" class="comparison-insight" hidden></p>
           <ul id="results-list" class="results-list"></ul>
           <button type="button" id="start-over-btn" class="start-over">Choose a different direction</button>
         </div>
@@ -110,7 +112,7 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
       interface ResultsPayload {
         totals: Record<ChoiceId, number>;
         totalCount: number;
-        mostPopular: ChoiceId | null;
+        mostPopularIds: ChoiceId[];
         sampleBaselineCount: number;
       }
 
@@ -141,6 +143,7 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
       const revealResourceLink = document.getElementById("reveal-resource-link") as HTMLAnchorElement;
       const revealResourceLabel = document.getElementById("reveal-resource-label") as HTMLElement;
       const sampleNote = document.getElementById("sample-note") as HTMLElement;
+      const comparisonInsight = document.getElementById("comparison-insight") as HTMLElement;
       const resultsList = document.getElementById("results-list") as HTMLElement;
       const startOverBtn = document.getElementById("start-over-btn") as HTMLButtonElement;
 
@@ -161,28 +164,59 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
         lastAction = null;
       }
 
-      function renderResults(payload: ResultsPayload) {
+      // PATH 1 STARTER
+      // Builds one text-only results row. Extend it with a percentage bar.
+      // Use the selection and leader values to distinguish relevant rows.
+      function buildResultRow(
+        choice: Choice,
+        count: number,
+        percent: number,
+        isSelected: boolean,
+        isSoleLeader: boolean,
+        isTiedLeader: boolean
+      ): HTMLLIElement {
+        const li = document.createElement("li");
+        li.className = "results-row";
+        li.dataset.selected = String(isSelected);
+        li.dataset.leader = isSoleLeader ? "sole" : isTiedLeader ? "tied" : "";
+
+        const leaderSuffix = isSoleLeader
+          ? " — most popular"
+          : isTiedLeader
+            ? " — tied for most popular"
+            : "";
+
+        li.innerHTML = `
+          <div class="results-row-head">
+            <span>${choice.label}${leaderSuffix}</span>
+            <span>${count} response${count === 1 ? "" : "s"} (${percent}%)</span>
+          </div>
+        `;
+        return li;
+      }
+
+      function renderResults(payload: ResultsPayload, selectedChoiceId: ChoiceId | null) {
         sampleNote.textContent = `Results started with ${payload.sampleBaselineCount} sample responses and update as people respond.`;
         resultsList.innerHTML = "";
         for (const choice of CHOICES) {
           const count = payload.totals[choice.id] ?? 0;
           const percent = payload.totalCount > 0 ? Math.round((count / payload.totalCount) * 100) : 0;
-          const isMostPopular = payload.mostPopular === choice.id;
+          const isSelected = choice.id === selectedChoiceId;
+          const isSoleLeader =
+            payload.mostPopularIds.length === 1 && payload.mostPopularIds[0] === choice.id;
+          const isTiedLeader =
+            payload.mostPopularIds.length > 1 && payload.mostPopularIds.includes(choice.id);
 
-          const li = document.createElement("li");
-          li.className = "results-row";
-          li.innerHTML = `
-            <div class="results-row-head">
-              <span>${choice.label}${isMostPopular ? " — most popular" : ""}</span>
-              <span>${count} response${count === 1 ? "" : "s"} (${percent}%)</span>
-            </div>
-            <div class="results-bar-track">
-              <div class="results-bar-fill" style="width:${percent}%; background:${choice.accentColor}"></div>
-            </div>
-          `;
-          resultsList.appendChild(li);
+          resultsList.appendChild(
+            buildResultRow(choice, count, percent, isSelected, isSoleLeader, isTiedLeader)
+          );
         }
       }
+
+      // PATH 2 STARTER
+      // Use the selected choice and current results to write one comparison sentence.
+      // Set the element's text, then reveal it.
+      function renderComparisonInsight(choiceId: ChoiceId, payload: ResultsPayload) {}
 
       function renderReveal(choiceId: ChoiceId, payload: ResultsPayload) {
         const choice = choicesById.get(choiceId);
@@ -197,7 +231,8 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
         revealExample.textContent = choice.buildDetails;
         revealResourceLink.href = choice.resourceUrl;
         revealResourceLabel.textContent = choice.resourceLabel;
-        renderResults(payload);
+        renderResults(payload, choiceId);
+        renderComparisonInsight(choiceId, payload);
 
         form.hidden = true;
         revealSection.hidden = false;
@@ -594,17 +629,20 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
         margin-bottom: 0.35rem;
       }
 
-      .results-bar-track {
-        background: #171717;
-        border-radius: 999px;
-        overflow: hidden;
-        height: 0.5rem;
+      .comparison-insight {
+        color: #ffffff;
+        font-weight: 600;
+        margin: 0 0 1rem;
       }
+    </style>
 
-      .results-bar-fill {
-        height: 100%;
-        border-radius: 999px;
-      }
+    <style is:global>
+      /*
+        DYNAMIC RESULTS STYLES
+
+        Add styles for markup created by buildResultRow() here. This global block
+        allows the styles to reach elements created by the client-side script.
+      */
     </style>
   </body>
 </html>

@@ -6,6 +6,7 @@
     "node": ">=22.12.0"
   },
   "scripts": {
+    "predev": "wrangler d1 migrations apply RESPONSES_DB --local",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro build && wrangler dev",

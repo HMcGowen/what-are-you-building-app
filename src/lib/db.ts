@@ -7,7 +7,10 @@ export const SAMPLE_BASELINE_COUNT = 24;
 export interface ResultsPayload {
   totals: Record<ChoiceId, number>;
   totalCount: number;
-  mostPopular: ChoiceId | null;
+  // Every choice currently sharing the highest count — length 1 means a
+  // sole leader, length > 1 means a tie for the lead. Empty only when
+  // totalCount is 0 (no responses at all).
+  mostPopularIds: ChoiceId[];
   sampleBaselineCount: number;
 }
 
@@ -30,20 +33,23 @@ async function buildResultsPayload(db: D1Database): Promise<ResultsPayload> {
   ) as Record<ChoiceId, number>;
 
   let totalCount = 0;
-  let mostPopular: ChoiceId | null = null;
-  let mostPopularCount = 0;
+  let maxCount = 0;
 
   for (const row of results ?? []) {
     if (!isChoiceId(row.choice_id)) continue;
     totals[row.choice_id] = row.total;
     totalCount += row.total;
-    if (row.total > mostPopularCount) {
-      mostPopularCount = row.total;
-      mostPopular = row.choice_id;
+    if (row.total > maxCount) {
+      maxCount = row.total;
     }
   }
 
-  return { totals, totalCount, mostPopular, sampleBaselineCount: SAMPLE_BASELINE_COUNT };
+  // Collect every choice at the max count, in canonical CHOICE_IDS order,
+  // rather than picking a single arbitrary "winner" — this is what makes
+  // an exact tie for the lead detectable instead of silently hidden.
+  const mostPopularIds = maxCount > 0 ? CHOICE_IDS.filter((id) => totals[id] === maxCount) : [];
+
+  return { totals, totalCount, mostPopularIds, sampleBaselineCount: SAMPLE_BASELINE_COUNT };
 }
 
 export async function getResults(db: D1Database): Promise<ResultsPayload> {
