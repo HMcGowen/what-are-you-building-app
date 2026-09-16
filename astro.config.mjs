@@ -4,7 +4,8 @@ import cloudflare from "@astrojs/cloudflare";
 
 // https://astro.build/config
 export default defineConfig({
-  base: "CLOUD_MOUNT_PATH",
+  // Leave `base` unset. Webflow Cloud injects the environment mount path
+  // at build time; local development and Codespaces use "/".
   output: "server",
   compressHTML: true,
   adapter: cloudflare({

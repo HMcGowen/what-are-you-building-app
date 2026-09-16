@@ -3,11 +3,8 @@ import { CHOICES } from "../config/choices";
 import { activityTheme } from "../config/activity-theme";
 
 const choicesJson = JSON.stringify(CHOICES);
-// import.meta.env.BASE_URL reflects Astro's configured base ("/" in a
-// deployed standalone app; a literal "/CLOUD_MOUNT_PATH/" placeholder in
-// local dev before Webflow's build substitutes the real mount path).
-// Client-side fetch/image URLs must be joined against it explicitly —
-// hardcoded root-relative paths silently 404 under a non-root base.
+// BASE_URL is "/" locally and reflects the mount path Webflow injects
+// at build time. Use withBase() for client-side asset and API paths.
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
 ---
 
