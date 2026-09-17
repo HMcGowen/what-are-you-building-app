@@ -23,6 +23,7 @@ activity paths extend it.
 - `src/pages/index.astro` — the whole UI, including the results-rendering flow
 - `migrations/0001_init.sql` — schema + 24 seeded sample responses
 - `learner-resources/path-1-styles.css` — copy-ready styles for the manual Path 1 activity
+- `learner-resources/agent-prompts.md` — copy-ready coding-agent prompts for Path 1 and Path 2
 
 ## Local development
 
