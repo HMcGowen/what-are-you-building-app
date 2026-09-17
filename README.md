@@ -22,6 +22,7 @@ activity paths extend it.
 - `src/pages/api/results.ts` / `submit.ts` — the two server endpoints
 - `src/pages/index.astro` — the whole UI, including the results-rendering flow
 - `migrations/0001_init.sql` — schema + 24 seeded sample responses
+- `learner-resources/path-1-styles.css` — copy-ready styles for the manual Path 1 activity
 
 ## Local development
 
