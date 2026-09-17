@@ -78,8 +78,6 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
         <div class="results-panel">
           <h3>How everyone has answered so far</h3>
           <p id="sample-note" class="sample-note"></p>
-          <!-- PATH 2: Hidden until renderComparisonInsight() adds content. -->
-          <p id="comparison-insight" class="comparison-insight" hidden></p>
           <ul id="results-list" class="results-list"></ul>
           <button type="button" id="start-over-btn" class="start-over">Choose a different direction</button>
         </div>
@@ -140,7 +138,6 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
       const revealResourceLink = document.getElementById("reveal-resource-link") as HTMLAnchorElement;
       const revealResourceLabel = document.getElementById("reveal-resource-label") as HTMLElement;
       const sampleNote = document.getElementById("sample-note") as HTMLElement;
-      const comparisonInsight = document.getElementById("comparison-insight") as HTMLElement;
       const resultsList = document.getElementById("results-list") as HTMLElement;
       const startOverBtn = document.getElementById("start-over-btn") as HTMLButtonElement;
 
@@ -161,7 +158,7 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
         lastAction = null;
       }
 
-      // PATH 1 STARTER
+      // ACTIVITY STARTER
       // Builds one text-only results row. Extend it with a percentage bar.
       // Use the selection and leader values to distinguish relevant rows.
       function buildResultRow(
@@ -210,11 +207,6 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
         }
       }
 
-      // PATH 2 STARTER
-      // Use the selected choice and current results to write one comparison sentence.
-      // Set the element's text, then reveal it.
-      function renderComparisonInsight(choiceId: ChoiceId, payload: ResultsPayload) {}
-
       function renderReveal(choiceId: ChoiceId, payload: ResultsPayload) {
         const choice = choicesById.get(choiceId);
         if (!choice) return;
@@ -229,7 +221,6 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
         revealResourceLink.href = choice.resourceUrl;
         revealResourceLabel.textContent = choice.resourceLabel;
         renderResults(payload, choiceId);
-        renderComparisonInsight(choiceId, payload);
 
         form.hidden = true;
         revealSection.hidden = false;
@@ -624,12 +615,6 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
         gap: 0.5rem;
         font-size: 0.95rem;
         margin-bottom: 0.35rem;
-      }
-
-      .comparison-insight {
-        color: #ffffff;
-        font-weight: 600;
-        margin: 0 0 1rem;
       }
     </style>
 

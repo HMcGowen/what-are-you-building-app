@@ -5,8 +5,8 @@ project direction, submit their choice, and get a reveal — their artifact,
 a short description, "what you could build," and a link to a relevant
 Webflow Cloud resource — plus shared results that persist after a refresh.
 
-This repository is the **working learner starting point**. Two optional
-activity paths extend it.
+This repository is the **working learner starting point** for the results
+visualization activity.
 
 ## Stack
 
@@ -22,8 +22,8 @@ activity paths extend it.
 - `src/pages/api/results.ts` / `submit.ts` — the two server endpoints
 - `src/pages/index.astro` — the whole UI, including the results-rendering flow
 - `migrations/0001_init.sql` — schema + 24 seeded sample responses
-- `learner-resources/path-1-styles.css` — copy-ready styles for the manual Path 1 activity
-- `learner-resources/agent-prompts.md` — copy-ready coding-agent prompts for Path 1 and Path 2
+- `learner-resources/results-styles.css` — copy-ready styles for the results visualization activity
+- `learner-resources/agent-prompts.md` — copy-ready coding-agent prompt for the activity
 
 ## Local development
 

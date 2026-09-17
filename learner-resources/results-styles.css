@@ -1,8 +1,8 @@
 /*
-  Copy-ready styles for the manual Path 1 activity (visualize the results).
-  Paste these rules into the designated <style is:global> block near the
-  bottom of src/pages/index.astro. Do not add them to the page's regular
-  scoped <style> block, or they won't reach the dynamically-rendered rows.
+  Copy-ready styles for the results visualization activity.
+  Paste these rules into the empty <style is:global> block in
+  src/pages/index.astro — do not add them to the page's regular scoped
+  <style> block, or they won't reach the dynamically rendered rows.
 */
 
 .results-row {
